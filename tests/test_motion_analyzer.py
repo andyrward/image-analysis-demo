@@ -236,8 +236,9 @@ class TestComputeVelocity:
             2 * vel1['vx'].dropna().mean(), rel=0.01
         )
         
-        # Doubling fps should halve velocity (more frames per second = slower motion per frame)
-        # But we're keeping same pixel displacement, so velocity in real units is halved
+        # Doubling fps should halve velocity in real-world units because:
+        # - Same pixel displacement occurs over less time (dt = 1/fps is halved)
+        # - velocity = displacement / time, so velocity is halved when time is halved
         assert vel3['vx'].dropna().mean() == pytest.approx(
             0.5 * vel1['vx'].dropna().mean(), rel=0.01
         )

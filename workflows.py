@@ -4,6 +4,7 @@ High-level workflow functions for particle tracking.
 Provides convenience APIs for common particle tracking workflows.
 """
 
+import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -461,7 +462,6 @@ def save_results(trajectories: pd.DataFrame,
     print(f"Saved MSD to {output_dir / 'msd.csv'}")
     
     # Save summary statistics
-    import json
     with open(output_dir / 'summary_stats.json', 'w') as f:
         json.dump(analysis['summary_stats'], f, indent=2)
     print(f"Saved summary statistics to {output_dir / 'summary_stats.json'}")

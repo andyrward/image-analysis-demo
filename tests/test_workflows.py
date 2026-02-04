@@ -173,10 +173,12 @@ class TestAnalyzeMotion:
         analysis2 = analyze_motion(trajectories, mpp=2.0, fps=1.0)
         
         # MSD should scale with mpp^2
+        # When mpp is doubled (2x), distances are 2x larger, so MSD (distance^2) is 4x larger
+        SPATIAL_SCALING_FACTOR_SQUARED = 4
         msd1_val = analysis1['msd']['msd'].iloc[1]
         msd2_val = analysis2['msd']['msd'].iloc[1]
         
-        assert msd2_val == pytest.approx(4 * msd1_val, rel=0.01)
+        assert msd2_val == pytest.approx(SPATIAL_SCALING_FACTOR_SQUARED * msd1_val, rel=0.01)
 
 
 class TestCompletePipeline:

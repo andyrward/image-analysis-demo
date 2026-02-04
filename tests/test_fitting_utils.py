@@ -294,10 +294,12 @@ class TestFitPolynomial2D:
         params, residual = fit_polynomial_2d(region)
         
         # Should recover coefficients (approximately, due to numerical fitting)
-        # c0 might be negative due to how polynomial fits the peak
+        # Note: c0 (constant term) might differ in sign from true_coeffs[0] because the 
+        # polynomial fit optimizes for the local region, and the coordinate system may be
+        # shifted. We care more about the shape (quadratic terms) being correct.
         assert abs(params['c0']) == pytest.approx(abs(true_coeffs[0]), abs=5)
-        assert params['c3'] < 0  # Negative quadratic term
-        assert params['c5'] < 0
+        assert params['c3'] < 0  # Negative quadratic term in x
+        assert params['c5'] < 0  # Negative quadratic term in y
         assert residual < 1e-6
     
     def test_fit_finds_peak(self):
