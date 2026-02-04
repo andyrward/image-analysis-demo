@@ -40,17 +40,17 @@ def generate_spots_image(n, spot_width, signal, noise_magnitude, image_size=512)
     # Generate NxN spots
     for i in range(n):
         for j in range(n):
-            # Calculate grid position
-            grid_x = (i + 1) * grid_spacing
-            grid_y = (j + 1) * grid_spacing
+            # Calculate grid position (i=row, j=column)
+            grid_y = (i + 1) * grid_spacing
+            grid_x = (j + 1) * grid_spacing
             
             # Add random sub-pixel offset (between -0.5 and 0.5 pixels)
-            random_offset_x = np.random.uniform(-0.5, 0.5)
             random_offset_y = np.random.uniform(-0.5, 0.5)
+            random_offset_x = np.random.uniform(-0.5, 0.5)
             
             # Final spot position
-            spot_x = grid_x + random_offset_x
             spot_y = grid_y + random_offset_y
+            spot_x = grid_x + random_offset_x
             
             # Generate 2D Gaussian spot
             gaussian = signal * np.exp(
