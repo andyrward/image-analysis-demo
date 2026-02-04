@@ -35,7 +35,7 @@ print(f"Position: x={result['x']:.2f}, y={result['y']:.2f}")
 
 ```bash
 # Quick demo
-python main.py
+python demo_quick.py
 
 # Comprehensive testing with interactive Plotly visualizations
 python demo_single_track.py

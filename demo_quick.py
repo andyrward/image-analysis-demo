@@ -1,13 +1,16 @@
 """
-Main entry point for the image-analysis-demo application.
+Quick demo script for the image-analysis-demo application.
+
+This provides a fast overview of all tracking methods without detailed analysis.
+For comprehensive results with interactive plots, use demo_single_track.py
 """
 
 import numpy as np
 from image_tracker import create_demo_image, track_spot
 
 
-def main():
-    """Main function demonstrating image tracking capabilities."""
+def quick_demo():
+    """Quick demo function showing all tracking methods at a glance."""
     print("=" * 70)
     print("Image Analysis Demo - Spot Tracking")
     print("=" * 70)
@@ -38,4 +41,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    quick_demo()

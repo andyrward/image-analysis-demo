@@ -9,7 +9,7 @@ pip install numpy scipy pillow plotly pandas jupyter kaleido
 
 ### 2. Run Basic Demo
 ```bash
-python main.py
+python demo_quick.py
 ```
 This provides a quick overview of all tracking methods.
 
@@ -70,7 +70,7 @@ On a 100x100 image with centered Gaussian spot:
 1. **For presentations**: Use the interactive HTML file
 2. **For reports**: Use the PNG export
 3. **For learning**: Use the Jupyter notebook
-4. **For quick tests**: Use main.py
+4. **For quick tests**: Use demo_quick.py
 
 ## Customization
 

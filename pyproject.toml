@@ -16,4 +16,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-py-modules = ["main", "image_tracker", "demo_single_track"]
+py-modules = ["demo_quick", "image_tracker", "demo_single_track"]
