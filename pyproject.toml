@@ -9,7 +9,9 @@ dependencies = [
     "pillow>=11.3.0",
     "pytrack>=1.0.1",
     "scipy>=1.11.0",
+    "matplotlib>=3.7.0",
+    "jupyter>=1.0.0",
 ]
 
 [tool.setuptools]
-py-modules = ["main", "image_tracker", "test_tracking"]
+py-modules = ["main", "image_tracker", "demo_single_track"]
