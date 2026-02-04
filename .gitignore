@@ -32,6 +32,10 @@ dist/
 build/
 *.egg-info/
 
+# Jupyter Notebook
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
 # Output images
 *.png
 *.jpg

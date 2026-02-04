@@ -1,6 +1,44 @@
 # Image Analysis Demo
 
-This repository contains Python code for generating and analyzing images with spots.
+This repository contains Python code for generating and analyzing synthetic images with spots.
+
+## Quick Start
+
+### Using the Jupyter Notebook (Recommended)
+
+The primary way to explore and use this project is through the **interactive Jupyter notebook**:
+
+```bash
+# Install dependencies
+pip install numpy pillow jupyter matplotlib
+
+# Start Jupyter
+jupyter notebook image_analysis_demo.ipynb
+```
+
+The notebook (`image_analysis_demo.ipynb`) provides:
+- Interactive demonstrations with different parameters
+- Visual comparisons of noise levels and spot widths
+- Example analysis and image statistics
+- Ready-to-run code cells for experimentation
+
+### Using the Python Module
+
+The core functionality is in `main.py`, which exports the `generate_spots_image()` function:
+
+```python
+from main import generate_spots_image
+import numpy as np
+
+# Generate a 5x5 grid of spots
+image = generate_spots_image(
+    n=5,                    # 5x5 grid
+    spot_width=3.0,         # Gaussian sigma in pixels
+    signal=100.0,           # Peak intensity
+    noise_magnitude=5.0,    # Noise level
+    image_size=512          # Image size in pixels
+)
+```
 
 ## Features
 
@@ -26,7 +64,7 @@ The `generate_spots_image()` function creates synthetic images with NxN spots pl
 Install the required dependencies:
 
 ```bash
-pip install numpy pillow
+pip install numpy pillow jupyter matplotlib
 ```
 
 Or if using `uv`:
@@ -35,43 +73,20 @@ Or if using `uv`:
 uv sync
 ```
 
-## Usage
+## Use Cases
 
-Run the demo:
-
-```bash
-python main.py
-```
-
-This will generate a sample image with 5x5 spots and save it as `spots_output.png`.
-
-### Using the Function
-
-```python
-from main import generate_spots_image
-import numpy as np
-from PIL import Image
-
-# Generate image with 5x5 spots
-n = 5
-spot_width = 3.0  # Gaussian sigma
-signal = 100.0     # Spot intensity
-noise_magnitude = 5.0  # Noise level
-
-image_array = generate_spots_image(n, spot_width, signal, noise_magnitude)
-
-# Save as image
-if image_array.max() > image_array.min():
-    image_normalized = (image_array - image_array.min()) / (image_array.max() - image_array.min()) * 255
-else:
-    image_normalized = np.full_like(image_array, 128)
-image_normalized = image_normalized.astype(np.uint8)
-img = Image.fromarray(image_normalized)
-img.save("output.png")
-```
+These synthetic images are ideal for:
+- Developing and testing spot detection algorithms
+- Validating sub-pixel localization methods
+- Benchmarking image analysis pipelines
+- Training machine learning models
+- Testing noise reduction techniques
 
 ## Requirements
 
 - Python >= 3.9
 - numpy >= 2.0.2
 - pillow >= 11.3.0
+- jupyter >= 1.0.0
+- matplotlib >= 3.8.0
+

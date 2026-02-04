@@ -1,5 +1,4 @@
 import numpy as np
-from PIL import Image
 
 
 def generate_spots_image(n, spot_width, signal, noise_magnitude, image_size=512):
@@ -70,35 +69,3 @@ def generate_spots_image(n, spot_width, signal, noise_magnitude, image_size=512)
     
     return image
 
-
-def main():
-    print("Generating image with spots...")
-    
-    # Example usage: 5x5 grid of spots
-    n = 5
-    spot_width = 3.0
-    signal = 100.0
-    noise_magnitude = 5.0
-    
-    # Generate the image
-    image_array = generate_spots_image(n, spot_width, signal, noise_magnitude)
-    
-    # Normalize to 0-255 range for saving
-    if image_array.max() > image_array.min():
-        image_normalized = (image_array - image_array.min()) / (image_array.max() - image_array.min()) * 255
-    else:
-        # If all values are the same, create a uniform gray image
-        image_normalized = np.full_like(image_array, 128)
-    image_normalized = image_normalized.astype(np.uint8)
-    
-    # Save the image
-    img = Image.fromarray(image_normalized)
-    img.save("spots_output.png")
-    
-    print(f"Generated {n}x{n} spots image and saved to 'spots_output.png'")
-    print(f"Image shape: {image_array.shape}")
-    print(f"Image range: [{image_array.min():.2f}, {image_array.max():.2f}]")
-
-
-if __name__ == "__main__":
-    main()
