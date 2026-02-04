@@ -40,3 +40,8 @@ build/
 *.png
 *.jpg
 *.jpeg
+# Demo outputs
+demo_output/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/

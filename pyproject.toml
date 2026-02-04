@@ -9,4 +9,13 @@ dependencies = [
     "pillow>=11.3.0",
     "jupyter>=1.0.0",
     "matplotlib>=3.8.0",
+    "pytrack>=1.0.1",
+    "scipy>=1.11.0",
+    "plotly>=5.17.0",
+    "pandas>=2.0.0",
+    "jupyter>=1.0.0",
+    "kaleido>=0.2.1",
 ]
+
+[tool.setuptools]
+py-modules = ["demo_quick", "image_tracker", "demo_single_track"]
