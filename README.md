@@ -26,7 +26,7 @@ The `generate_spots_image()` function creates synthetic images with NxN spots pl
 Install the required dependencies:
 
 ```bash
-pip install numpy pillow pytrack
+pip install numpy pillow
 ```
 
 Or if using `uv`:
@@ -61,7 +61,10 @@ noise_magnitude = 5.0  # Noise level
 image_array = generate_spots_image(n, spot_width, signal, noise_magnitude)
 
 # Save as image
-image_normalized = (image_array - image_array.min()) / (image_array.max() - image_array.min()) * 255
+if image_array.max() > image_array.min():
+    image_normalized = (image_array - image_array.min()) / (image_array.max() - image_array.min()) * 255
+else:
+    image_normalized = np.full_like(image_array, 128)
 image_normalized = image_normalized.astype(np.uint8)
 img = Image.fromarray(image_normalized)
 img.save("output.png")
@@ -72,4 +75,3 @@ img.save("output.png")
 - Python >= 3.9
 - numpy >= 2.0.2
 - pillow >= 11.3.0
-- pytrack >= 1.0.1

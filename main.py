@@ -84,7 +84,11 @@ def main():
     image_array = generate_spots_image(n, spot_width, signal, noise_magnitude)
     
     # Normalize to 0-255 range for saving
-    image_normalized = (image_array - image_array.min()) / (image_array.max() - image_array.min()) * 255
+    if image_array.max() > image_array.min():
+        image_normalized = (image_array - image_array.min()) / (image_array.max() - image_array.min()) * 255
+    else:
+        # If all values are the same, create a uniform gray image
+        image_normalized = np.full_like(image_array, 128)
     image_normalized = image_normalized.astype(np.uint8)
     
     # Save the image
