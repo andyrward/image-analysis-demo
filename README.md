@@ -24,10 +24,10 @@ The notebook (`image_analysis_demo.ipynb`) provides:
 
 ### Using the Python Module
 
-The core functionality is in `main.py`, which exports the `generate_spots_image()` function:
+The core functionality is in `spot_generator.py`, which exports the `generate_spots_image()` function:
 
 ```python
-from main import generate_spots_image
+from spot_generator import generate_spots_image
 import numpy as np
 
 # Generate a 5x5 grid of spots

@@ -1,3 +1,10 @@
+"""
+Image analysis module for generating synthetic spot images.
+
+This module provides functionality to create test images with spots at
+sub-pixel coordinates for validating image analysis algorithms.
+"""
+
 import numpy as np
 
 
@@ -68,4 +75,3 @@ def generate_spots_image(n, spot_width, signal, noise_magnitude, image_size=512)
     image = np.maximum(image, 0)
     
     return image
-
