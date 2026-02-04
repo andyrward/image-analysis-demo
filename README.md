@@ -13,7 +13,7 @@ This library provides a generic image tracking function that supports multiple m
 ## Installation
 
 ```bash
-pip install numpy scipy pillow
+pip install numpy scipy pillow plotly pandas jupyter
 ```
 
 ## Usage
@@ -37,9 +37,18 @@ print(f"Position: x={result['x']:.2f}, y={result['y']:.2f}")
 # Quick demo
 python main.py
 
-# Comprehensive testing
-python test_tracking.py
+# Comprehensive testing with interactive Plotly visualizations
+python demo_single_track.py
+
+# Interactive Jupyter notebook with plots
+jupyter notebook demo_tracking.ipynb
 ```
+
+The demo scripts generate:
+- **Quantitative metrics** comparing all tracking methods
+- **Interactive Plotly visualizations** (hover, zoom, pan)
+- **HTML output** with interactive plots
+- **PNG exports** of the visualizations
 
 ## API Reference
 

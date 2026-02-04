@@ -31,7 +31,9 @@ def main():
             print(f"  {method:10s}: Failed - {result.get('error', 'Unknown error')}")
     
     print()
-    print("For detailed testing, run: python test_tracking.py")
+    print("For detailed testing with interactive plots:")
+    print("  - Python script: python demo_single_track.py")
+    print("  - Jupyter notebook: jupyter notebook demo_tracking.ipynb")
     print()
 
 

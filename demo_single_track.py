@@ -1,13 +1,15 @@
 """
-Demo script for single spot tracking with quantitative outputs and visualization.
+Demo script for single spot tracking with quantitative outputs and interactive visualization.
 
 This script demonstrates tracking a single spot on a 100x100 image using all
-available tracking methods, provides quantitative metrics, and generates plots.
+available tracking methods, provides quantitative metrics, and generates interactive plots.
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
 from image_tracker import create_demo_image, track_spot
 from pathlib import Path
 
@@ -21,7 +23,7 @@ def create_output_dir():
 
 def plot_tracking_results(image, results, true_position, output_dir):
     """
-    Create visualization plots for tracking results.
+    Create interactive visualization plots for tracking results using Plotly.
     
     Args:
         image: The test image
@@ -36,37 +38,72 @@ def plot_tracking_results(image, results, true_position, output_dir):
         print("No successful tracking results to plot.")
         return
     
-    # Create figure with subplots
-    fig = plt.figure(figsize=(15, 10))
+    # Create subplots
+    fig = make_subplots(
+        rows=3, cols=2,
+        subplot_titles=(
+            'Image with Tracked Positions',
+            'Zoomed View (±15 pixels)',
+            'Position Error Comparison',
+            'X and Y Error Components',
+            'Goodness of Fit (R²)',
+            'Error Scatter Plot'
+        ),
+        specs=[
+            [{"type": "heatmap"}, {"type": "heatmap"}],
+            [{"type": "bar"}, {"type": "bar"}],
+            [{"type": "bar"}, {"type": "scatter"}]
+        ],
+        vertical_spacing=0.12,
+        horizontal_spacing=0.12
+    )
     
-    # Plot 1: Image with tracked positions
-    ax1 = plt.subplot(2, 3, 1)
-    im = ax1.imshow(image, cmap='hot', origin='lower')
-    plt.colorbar(im, ax=ax1, label='Intensity')
-    ax1.set_title('Image with Tracked Positions', fontsize=12, fontweight='bold')
-    ax1.set_xlabel('X (pixels)')
-    ax1.set_ylabel('Y (pixels)')
+    # Plot 1: Full image with tracked positions
+    fig.add_trace(
+        go.Heatmap(
+            z=image,
+            colorscale='Hot',
+            showscale=True,
+            colorbar=dict(x=0.46, len=0.25, y=0.87),
+            hovertemplate='X: %{x}<br>Y: %{y}<br>Intensity: %{z:.2f}<extra></extra>'
+        ),
+        row=1, col=1
+    )
     
-    # Plot true position
-    ax1.plot(true_position[0], true_position[1], 'g+', markersize=15, 
-             markeredgewidth=2, label='True Position')
+    # Add true position
+    fig.add_trace(
+        go.Scatter(
+            x=[true_position[0]], y=[true_position[1]],
+            mode='markers',
+            marker=dict(symbol='x', size=15, color='lime', line=dict(width=2)),
+            name='True Position',
+            hovertemplate='True: (%{x:.2f}, %{y:.2f})<extra></extra>'
+        ),
+        row=1, col=1
+    )
     
-    # Plot tracked positions
-    colors = {'gaussian': 'cyan', 'parabola': 'yellow', 'pytrack': 'magenta'}
-    markers = {'gaussian': 'x', 'parabola': '^', 'pytrack': 'o'}
+    # Add tracked positions
+    colors_map = {'gaussian': 'cyan', 'parabola': 'yellow', 'pytrack': 'magenta'}
+    markers_map = {'gaussian': 'x', 'parabola': 'triangle-up', 'pytrack': 'circle'}
     
     for method, result in successful_results.items():
-        color = colors.get(method, 'white')
-        marker = markers.get(method, 's')
-        ax1.plot(result['x'], result['y'], marker, color=color, 
-                markersize=10, markeredgewidth=2, 
-                label=f'{method.capitalize()}')
+        fig.add_trace(
+            go.Scatter(
+                x=[result['x']], y=[result['y']],
+                mode='markers',
+                marker=dict(
+                    symbol=markers_map.get(method, 'square'),
+                    size=12,
+                    color=colors_map.get(method, 'white'),
+                    line=dict(width=2, color='black')
+                ),
+                name=method.capitalize(),
+                hovertemplate=f'{method.capitalize()}: (%{{x:.4f}}, %{{y:.4f}})<extra></extra>'
+            ),
+            row=1, col=1
+        )
     
-    ax1.legend(loc='upper right', fontsize=9)
-    ax1.grid(True, alpha=0.3)
-    
-    # Plot 2: Zoomed view around spot
-    ax2 = plt.subplot(2, 3, 2)
+    # Plot 2: Zoomed view
     x_center, y_center = true_position
     zoom_size = 15
     x_min = max(0, int(x_center - zoom_size))
@@ -75,27 +112,50 @@ def plot_tracking_results(image, results, true_position, output_dir):
     y_max = min(image.shape[0], int(y_center + zoom_size))
     
     zoomed = image[y_min:y_max, x_min:x_max]
-    im2 = ax2.imshow(zoomed, cmap='hot', origin='lower', 
-                     extent=[x_min, x_max, y_min, y_max])
-    plt.colorbar(im2, ax=ax2, label='Intensity')
-    ax2.set_title('Zoomed View (±15 pixels)', fontsize=12, fontweight='bold')
-    ax2.set_xlabel('X (pixels)')
-    ax2.set_ylabel('Y (pixels)')
     
-    # Plot positions on zoomed view
-    ax2.plot(true_position[0], true_position[1], 'g+', markersize=12, 
-             markeredgewidth=2, label='True')
+    fig.add_trace(
+        go.Heatmap(
+            z=zoomed,
+            x=list(range(x_min, x_max)),
+            y=list(range(y_min, y_max)),
+            colorscale='Hot',
+            showscale=True,
+            colorbar=dict(x=1.0, len=0.25, y=0.87),
+            hovertemplate='X: %{x}<br>Y: %{y}<br>Intensity: %{z:.2f}<extra></extra>'
+        ),
+        row=1, col=2
+    )
+    
+    # Add markers to zoomed view
+    fig.add_trace(
+        go.Scatter(
+            x=[true_position[0]], y=[true_position[1]],
+            mode='markers',
+            marker=dict(symbol='x', size=12, color='lime', line=dict(width=2)),
+            showlegend=False,
+            hovertemplate='True: (%{x:.2f}, %{y:.2f})<extra></extra>'
+        ),
+        row=1, col=2
+    )
     
     for method, result in successful_results.items():
-        color = colors.get(method, 'white')
-        marker = markers.get(method, 's')
-        ax2.plot(result['x'], result['y'], marker, color=color, 
-                markersize=8, markeredgewidth=1.5)
-    
-    ax2.grid(True, alpha=0.3)
+        fig.add_trace(
+            go.Scatter(
+                x=[result['x']], y=[result['y']],
+                mode='markers',
+                marker=dict(
+                    symbol=markers_map.get(method, 'square'),
+                    size=10,
+                    color=colors_map.get(method, 'white'),
+                    line=dict(width=2, color='black')
+                ),
+                showlegend=False,
+                hovertemplate=f'{method.capitalize()}: (%{{x:.4f}}, %{{y:.4f}})<extra></extra>'
+            ),
+            row=1, col=2
+        )
     
     # Plot 3: Position error comparison
-    ax3 = plt.subplot(2, 3, 3)
     methods_list = list(successful_results.keys())
     errors = []
     for method in methods_list:
@@ -104,114 +164,152 @@ def plot_tracking_results(image, results, true_position, output_dir):
                        (result['y'] - true_position[1])**2)
         errors.append(error)
     
-    bars = ax3.bar(range(len(methods_list)), errors, 
-                   color=[colors.get(m, 'gray') for m in methods_list],
-                   edgecolor='black', linewidth=1.5)
-    ax3.set_xticks(range(len(methods_list)))
-    ax3.set_xticklabels([m.capitalize() for m in methods_list], rotation=45)
-    ax3.set_ylabel('Position Error (pixels)', fontweight='bold')
-    ax3.set_title('Tracking Accuracy Comparison', fontsize=12, fontweight='bold')
-    ax3.grid(axis='y', alpha=0.3)
-    
-    # Add value labels on bars
-    for i, (bar, error) in enumerate(zip(bars, errors)):
-        height = bar.get_height()
-        ax3.text(bar.get_x() + bar.get_width()/2., height,
-                f'{error:.4f}',
-                ha='center', va='bottom', fontsize=9, fontweight='bold')
+    fig.add_trace(
+        go.Bar(
+            x=[m.capitalize() for m in methods_list],
+            y=errors,
+            marker=dict(
+                color=[colors_map.get(m, 'gray') for m in methods_list],
+                line=dict(color='black', width=2)
+            ),
+            text=[f'{e:.4f}' for e in errors],
+            textposition='outside',
+            showlegend=False,
+            hovertemplate='%{x}<br>Error: %{y:.6f} px<extra></extra>'
+        ),
+        row=2, col=1
+    )
     
     # Plot 4: X and Y error components
-    ax4 = plt.subplot(2, 3, 4)
     x_errors = [successful_results[m]['x'] - true_position[0] for m in methods_list]
     y_errors = [successful_results[m]['y'] - true_position[1] for m in methods_list]
     
-    x_pos = np.arange(len(methods_list))
-    width = 0.35
+    fig.add_trace(
+        go.Bar(
+            x=[m.capitalize() for m in methods_list],
+            y=x_errors,
+            name='X Error',
+            marker=dict(color='steelblue', line=dict(color='black', width=1.5)),
+            hovertemplate='%{x}<br>X Error: %{y:.4f} px<extra></extra>'
+        ),
+        row=2, col=2
+    )
     
-    bars1 = ax4.bar(x_pos - width/2, x_errors, width, label='X Error', 
-                    color='steelblue', edgecolor='black')
-    bars2 = ax4.bar(x_pos + width/2, y_errors, width, label='Y Error', 
-                    color='coral', edgecolor='black')
+    fig.add_trace(
+        go.Bar(
+            x=[m.capitalize() for m in methods_list],
+            y=y_errors,
+            name='Y Error',
+            marker=dict(color='coral', line=dict(color='black', width=1.5)),
+            hovertemplate='%{x}<br>Y Error: %{y:.4f} px<extra></extra>'
+        ),
+        row=2, col=2
+    )
     
-    ax4.set_xticks(x_pos)
-    ax4.set_xticklabels([m.capitalize() for m in methods_list], rotation=45)
-    ax4.set_ylabel('Error (pixels)', fontweight='bold')
-    ax4.set_title('X and Y Position Errors', fontsize=12, fontweight='bold')
-    ax4.axhline(y=0, color='black', linestyle='-', linewidth=0.8)
-    ax4.legend()
-    ax4.grid(axis='y', alpha=0.3)
-    
-    # Plot 5: R² comparison (for methods that have it)
-    ax5 = plt.subplot(2, 3, 5)
+    # Plot 5: R² comparison
     r2_methods = [m for m in methods_list if 'r_squared' in successful_results[m]]
     if r2_methods:
         r2_values = [successful_results[m]['r_squared'] for m in r2_methods]
-        bars = ax5.bar(range(len(r2_methods)), r2_values,
-                      color=[colors.get(m, 'gray') for m in r2_methods],
-                      edgecolor='black', linewidth=1.5)
-        ax5.set_xticks(range(len(r2_methods)))
-        ax5.set_xticklabels([m.capitalize() for m in r2_methods], rotation=45)
-        ax5.set_ylabel('R² Score', fontweight='bold')
-        ax5.set_title('Goodness of Fit (R²)', fontsize=12, fontweight='bold')
-        ax5.set_ylim([0, 1.05])
-        ax5.grid(axis='y', alpha=0.3)
-        
-        # Add value labels
-        for bar, r2 in zip(bars, r2_values):
-            height = bar.get_height()
-            ax5.text(bar.get_x() + bar.get_width()/2., height,
-                    f'{r2:.4f}',
-                    ha='center', va='bottom', fontsize=9, fontweight='bold')
-    else:
-        ax5.text(0.5, 0.5, 'No R² data available', 
-                ha='center', va='center', transform=ax5.transAxes)
-        ax5.set_title('Goodness of Fit (R²)', fontsize=12, fontweight='bold')
+        fig.add_trace(
+            go.Bar(
+                x=[m.capitalize() for m in r2_methods],
+                y=r2_values,
+                marker=dict(
+                    color=[colors_map.get(m, 'gray') for m in r2_methods],
+                    line=dict(color='black', width=2)
+                ),
+                text=[f'{r:.4f}' for r in r2_values],
+                textposition='outside',
+                showlegend=False,
+                hovertemplate='%{x}<br>R²: %{y:.6f}<extra></extra>'
+            ),
+            row=3, col=1
+        )
     
-    # Plot 6: Summary statistics table
-    ax6 = plt.subplot(2, 3, 6)
-    ax6.axis('tight')
-    ax6.axis('off')
-    
-    # Prepare table data
-    table_data = [['Method', 'X Pos', 'Y Pos', 'Error (px)', 'R²']]
+    # Plot 6: Error scatter plot
     for method in methods_list:
         result = successful_results[method]
-        error = np.sqrt((result['x'] - true_position[0])**2 + 
-                       (result['y'] - true_position[1])**2)
-        r2_str = f"{result['r_squared']:.4f}" if 'r_squared' in result else 'N/A'
-        table_data.append([
-            method.capitalize(),
-            f"{result['x']:.4f}",
-            f"{result['y']:.4f}",
-            f"{error:.4f}",
-            r2_str
-        ])
+        x_err = result['x'] - true_position[0]
+        y_err = result['y'] - true_position[1]
+        
+        fig.add_trace(
+            go.Scatter(
+                x=[x_err], y=[y_err],
+                mode='markers',
+                marker=dict(
+                    symbol=markers_map.get(method, 'square'),
+                    size=15,
+                    color=colors_map.get(method, 'white'),
+                    line=dict(width=2, color='black')
+                ),
+                name=f'{method.capitalize()} Error',
+                showlegend=False,
+                hovertemplate=f'{method.capitalize()}<br>X Error: %{{x:.4f}}<br>Y Error: %{{y:.4f}}<extra></extra>'
+            ),
+            row=3, col=2
+        )
     
-    table = ax6.table(cellText=table_data, cellLoc='center', loc='center',
-                     colWidths=[0.18, 0.18, 0.18, 0.18, 0.18])
-    table.auto_set_font_size(False)
-    table.set_fontsize(9)
-    table.scale(1, 2)
+    # Add perfect position marker
+    fig.add_trace(
+        go.Scatter(
+            x=[0], y=[0],
+            mode='markers',
+            marker=dict(symbol='x', size=20, color='lime', line=dict(width=3)),
+            name='Perfect (0,0)',
+            showlegend=False,
+            hovertemplate='Perfect: (0, 0)<extra></extra>'
+        ),
+        row=3, col=2
+    )
     
-    # Style header row
-    for i in range(5):
-        table[(0, i)].set_facecolor('#4CAF50')
-        table[(0, i)].set_text_props(weight='bold', color='white')
+    # Add reference lines to scatter plot
+    fig.add_hline(y=0, line_dash="dash", line_color="gray", row=3, col=2)
+    fig.add_vline(x=0, line_dash="dash", line_color="gray", row=3, col=2)
     
-    # Alternate row colors
-    for i in range(1, len(table_data)):
-        for j in range(5):
-            if i % 2 == 0:
-                table[(i, j)].set_facecolor('#f0f0f0')
+    # Update layout
+    fig.update_xaxes(title_text="X (pixels)", row=1, col=1)
+    fig.update_yaxes(title_text="Y (pixels)", row=1, col=1)
+    fig.update_xaxes(title_text="X (pixels)", row=1, col=2)
+    fig.update_yaxes(title_text="Y (pixels)", row=1, col=2)
+    fig.update_xaxes(title_text="Method", row=2, col=1)
+    fig.update_yaxes(title_text="Position Error (pixels)", row=2, col=1)
+    fig.update_xaxes(title_text="Method", row=2, col=2)
+    fig.update_yaxes(title_text="Error (pixels)", row=2, col=2)
+    fig.update_xaxes(title_text="Method", row=3, col=1)
+    fig.update_yaxes(title_text="R² Score", row=3, col=1)
+    fig.update_xaxes(title_text="X Error (pixels)", row=3, col=2)
+    fig.update_yaxes(title_text="Y Error (pixels)", row=3, col=2)
     
-    ax6.set_title('Quantitative Results Summary', fontsize=12, fontweight='bold', pad=20)
+    # Update overall layout
+    fig.update_layout(
+        title_text="<b>Interactive Tracking Results Analysis</b>",
+        title_x=0.5,
+        title_font_size=20,
+        height=1200,
+        width=1400,
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        hovermode='closest'
+    )
     
-    plt.tight_layout()
+    # Save as interactive HTML
+    output_file = output_dir / 'tracking_results_interactive.html'
+    fig.write_html(str(output_file))
+    print(f"\n✓ Interactive plot saved to: {output_file}")
     
-    # Save figure
-    output_file = output_dir / 'tracking_results.png'
-    plt.savefig(output_file, dpi=150, bbox_inches='tight')
-    print(f"\n✓ Plot saved to: {output_file}")
+    # Also save as static image
+    try:
+        static_file = output_dir / 'tracking_results.png'
+        fig.write_image(str(static_file), width=1400, height=1200)
+        print(f"✓ Static plot saved to: {static_file}")
+    except Exception as e:
+        print(f"  Note: Could not save static image (kaleido may not be installed): {e}")
     
     return fig
 
@@ -351,6 +449,9 @@ def demo_single_spot_tracking():
 if __name__ == "__main__":
     results, image = demo_single_spot_tracking()
     
-    # Show plots (optional - comment out if running in non-interactive environment)
-    print("\nDisplaying plots... (close plot window to exit)")
-    plt.show()
+    print("\nDemo completed! Open the HTML file in your browser for interactive visualization.")
+    print("Note: The interactive plot allows you to:")
+    print("  - Hover over points to see exact values")
+    print("  - Zoom in/out on any subplot")
+    print("  - Pan around the images")
+    print("  - Toggle traces on/off by clicking legend items")
