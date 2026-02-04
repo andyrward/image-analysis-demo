@@ -31,3 +31,8 @@ Desktop.ini
 dist/
 build/
 *.egg-info/
+
+# Output images
+*.png
+*.jpg
+*.jpeg
