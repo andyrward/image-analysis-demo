@@ -8,4 +8,8 @@ dependencies = [
     "numpy>=2.0.2",
     "pillow>=11.3.0",
     "pytrack>=1.0.1",
+    "scipy>=1.11.0",
 ]
+
+[tool.setuptools]
+py-modules = ["main", "image_tracker", "test_tracking"]
