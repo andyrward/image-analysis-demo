@@ -235,11 +235,10 @@ def track_spot_trackpy(image: np.ndarray, initial_guess: Tuple[float, float] = N
         
         # Use trackpy.locate to find the spot
         # trackpy expects diameter to be odd
-        if diameter % 2 == 0:
-            diameter += 1
+        adjusted_diameter = diameter if diameter % 2 == 1 else diameter + 1
         
         # Locate features in the image
-        features = tp.locate(image, diameter=diameter, minmass=0)
+        features = tp.locate(image, diameter=adjusted_diameter, minmass=0)
         
         if len(features) == 0:
             return {

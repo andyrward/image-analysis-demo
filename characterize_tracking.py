@@ -24,8 +24,9 @@ def create_particle_image(position, image_size=100, diameter=4, amplitude=100.0)
     Returns:
         2D numpy array containing the image
     """
-    # Convert diameter to sigma (FWHM = 2.355 * sigma, diameter ~ 2*FWHM)
-    # For diameter = 4, we use sigma = 2 as a reasonable approximation
+    # Convert diameter to sigma
+    # For a Gaussian particle, we use sigma = diameter / 2.0 as a simple approximation
+    # This gives a reasonable particle size for the tracking tests
     sigma = diameter / 2.0
     
     image = create_demo_image(
