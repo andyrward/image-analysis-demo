@@ -12,7 +12,7 @@ from scipy.optimize import curve_fit
 from typing import Tuple, Dict, Any, Literal
 
 
-TrackingMethod = Literal["pytrack", "gaussian", "parabola"]
+TrackingMethod = Literal["pytrack", "trackpy", "gaussian", "parabola"]
 
 
 def create_demo_image(size: int = 100, spot_center: Tuple[float, float] = None, 
@@ -217,6 +217,71 @@ def track_spot_gaussian(image: np.ndarray, initial_guess: Tuple[float, float] = 
         }
 
 
+def track_spot_trackpy(image: np.ndarray, initial_guess: Tuple[float, float] = None,
+                      diameter: int = 11) -> Dict[str, Any]:
+    """
+    Track a spot using the trackpy library (Crocker-Grier algorithm).
+    
+    Args:
+        image: 2D numpy array containing the image
+        initial_guess: Initial (x, y) position guess (not used by trackpy)
+        diameter: Odd integer for the feature size in pixels
+        
+    Returns:
+        Dictionary containing tracking results
+    """
+    try:
+        import trackpy as tp
+        
+        # Use trackpy.locate to find the spot
+        # trackpy expects diameter to be odd
+        adjusted_diameter = diameter if diameter % 2 == 1 else diameter + 1
+        
+        # Locate features in the image
+        features = tp.locate(image, diameter=adjusted_diameter, minmass=0)
+        
+        if len(features) == 0:
+            return {
+                "method": "trackpy",
+                "success": False,
+                "error": "No spots detected"
+            }
+        
+        # If initial guess provided, find closest feature
+        if initial_guess is not None and len(features) > 1:
+            distances = np.sqrt(
+                (features['x'].values - initial_guess[0])**2 + 
+                (features['y'].values - initial_guess[1])**2
+            )
+            closest_idx = np.argmin(distances)
+            feature = features.iloc[closest_idx]
+        else:
+            # Use the brightest feature
+            feature = features.iloc[0]
+        
+        return {
+            "method": "trackpy",
+            "success": True,
+            "x": float(feature['x']),
+            "y": float(feature['y']),
+            "mass": float(feature['mass']),
+            "size": float(feature['size']),
+            "ecc": float(feature['ecc'])
+        }
+    except ImportError:
+        return {
+            "method": "trackpy",
+            "success": False,
+            "error": "trackpy library not installed"
+        }
+    except Exception as e:
+        return {
+            "method": "trackpy",
+            "success": False,
+            "error": str(e)
+        }
+
+
 def track_spot_parabola(image: np.ndarray, initial_guess: Tuple[float, float] = None, 
                        window_size: int = 20) -> Dict[str, Any]:
     """
@@ -309,7 +374,7 @@ def track_spot(image: np.ndarray, method: TrackingMethod = "gaussian",
     
     Args:
         image: 2D numpy array containing the image
-        method: Tracking method to use ("pytrack", "gaussian", or "parabola")
+        method: Tracking method to use ("pytrack", "trackpy", "gaussian", or "parabola")
         initial_guess: Initial (x, y) position guess for the spot
         **kwargs: Additional method-specific parameters
         
@@ -325,10 +390,12 @@ def track_spot(image: np.ndarray, method: TrackingMethod = "gaussian",
     """
     if method == "pytrack":
         return track_spot_pytrack(image, initial_guess)
+    elif method == "trackpy":
+        return track_spot_trackpy(image, initial_guess, **kwargs)
     elif method == "gaussian":
         return track_spot_gaussian(image, initial_guess, **kwargs)
     elif method == "parabola":
         return track_spot_parabola(image, initial_guess, **kwargs)
     else:
         raise ValueError(f"Unsupported tracking method: {method}. "
-                        f"Supported methods are: 'pytrack', 'gaussian', 'parabola'")
+                        f"Supported methods are: 'pytrack', 'trackpy', 'gaussian', 'parabola'")
