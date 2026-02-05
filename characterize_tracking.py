@@ -38,13 +38,13 @@ def create_particle_image(position, image_size=100, diameter=4, amplitude=100.0)
     return image
 
 
-def track_moving_particle(n_steps=201, step_size=0.1, start_x=50.5, start_y=50.5):
+def track_moving_particle(n_steps=201, step_size=0.01, start_x=50.5, start_y=50.5):
     """
     Track a particle moving in small increments using multiple methods.
     
     Args:
         n_steps: Number of frames to generate (default 201)
-        step_size: Distance to move particle each step in pixels (default 0.1)
+        step_size: Distance to move particle each step in pixels (default 0.01)
         start_x: Starting x position (default 50.5)
         start_y: Starting y position (default 50.5)
         
@@ -214,7 +214,7 @@ def plot_tracking_results(data, output_dir):
     
     # Create figure with subplots
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle('Tracking Method Characterization: Single Particle Moving 0.1 px/step', 
+    fig.suptitle('Tracking Method Characterization: Single Particle Moving 0.01 px/step', 
                  fontsize=14, fontweight='bold')
     
     # Plot 1: X position tracking
@@ -366,8 +366,8 @@ def main():
     print("\nTest Configuration:")
     print("  - Single particle with diameter 4 pixels")
     print("  - Starting position: (50.5, 50.5)")
-    print("  - Movement: 0.1 pixel/step in X direction")
-    print("  - Number of steps: 201 (total movement: 20 pixels)")
+    print("  - Movement: 0.01 pixel/step in X direction")
+    print("  - Number of steps: 201 (total movement: 2 pixels)")
     print("  - Tracking methods: trackpy, gaussian, parabola")
     print()
     
@@ -380,7 +380,7 @@ def main():
     print("=" * 90)
     print("STEP 1: Tracking particle across 201 frames")
     print("=" * 90)
-    data = track_moving_particle(n_steps=201, step_size=0.1, start_x=50.5, start_y=50.5)
+    data = track_moving_particle(n_steps=201, step_size=0.01, start_x=50.5, start_y=50.5)
     print("✓ Tracking complete\n")
     
     # Compute statistics

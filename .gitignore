@@ -42,6 +42,7 @@ build/
 *.jpeg
 # Demo outputs
 demo_output/
+characterization_output/
 
 # Jupyter notebook checkpoints
 .ipynb_checkpoints/
